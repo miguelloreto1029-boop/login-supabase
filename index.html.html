@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body class="pagina-login">
+
+    <main class="tarjeta" id="tarjeta">
+        <div class="sello">✦</div>
+        <h1>Iniciar sesión</h1>
+        <p class="subtitulo">Ingresa tus credenciales para continuar</p>
+
+        <form id="form-login" novalidate>
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" autocomplete="username" placeholder="nombre@correo.com" required>
+
+            <label for="clave">Contraseña</label>
+            <input type="password" id="clave" autocomplete="current-password" placeholder="••••••••" required>
+
+            <button type="submit" id="btn-ingresar">Ingresar</button>
+            <p id="mensaje" role="alert" aria-live="polite"></p>
+        </form>
+    </main>
+
+    <script src="db.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>

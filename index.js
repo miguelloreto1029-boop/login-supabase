@@ -1,7 +1,3 @@
-// Datos de conexión a Supabase (la clave "publishable" está pensada para usarse en el navegador)
-const SUPABASE_URL = "https://hypxybgvxvpwfqflijty.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_x6A2XiGzM9F2Qlk9xwBUvA_UK3HoJJz";
-
 const formulario = document.getElementById("form-login");
 const campoCorreo = document.getElementById("correo");
 const campoClave = document.getElementById("clave");
@@ -9,40 +5,23 @@ const botonIngresar = document.getElementById("btn-ingresar");
 const mensaje = document.getElementById("mensaje");
 const tarjeta = document.getElementById("tarjeta");
 
-// Si ya hay una sesión abierta, ir directo a la bienvenida
+// Si ya hay sesión, ir directo a bienvenida
 if (sessionStorage.getItem("usuario")) {
     window.location.replace("bienvenida.html");
 }
 
-function mostrarMensaje(texto, tipo) {
+function mostrarError(texto) {
     mensaje.textContent = texto;
-    mensaje.className = tipo; // "error" o "ok"
+    mensaje.className = "error";
+    tarjeta.classList.remove("sacudir");
+    void tarjeta.offsetWidth; // reinicia la animación
+    tarjeta.classList.add("sacudir");
 }
 
-// Consulta a Supabase si el usuario existe y la contraseña es correcta
-async function validarUsuario(correo, clave) {
-    const respuesta = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_PUBLISHABLE_KEY
-        },
-        body: JSON.stringify({ email: correo, password: clave })
-    });
-
-    const datos = await respuesta.json().catch(function () { return {}; });
-
-    if (respuesta.ok) {
-        return { existe: true, usuario: datos.user, token: datos.access_token };
-    }
-
-    // Credenciales incorrectas o usuario inexistente
-    if (respuesta.status === 400 && datos.error_code !== "email_not_confirmed") {
-        return { existe: false };
-    }
-
-    // Cualquier otro caso es un problema técnico (clave inválida, correo sin confirmar, etc.)
-    throw new Error(datos.msg || datos.error_description || datos.message || ("Error " + respuesta.status));
+// Si se vuelve desde una validación fallida, mostrar el aviso
+const parametros = new URLSearchParams(window.location.search);
+if (parametros.get("error") === "invalido") {
+    mostrarError("Usuario inválido. Verifica tu correo y contraseña.");
 }
 
 formulario.addEventListener("submit", async function (evento) {
@@ -52,30 +31,27 @@ formulario.addEventListener("submit", async function (evento) {
     const clave = campoClave.value;
 
     if (!correo || !clave) {
-        mostrarMensaje("Escribe tu correo y tu contraseña.", "error");
+        mostrarError("Escribe tu correo y tu contraseña.");
         return;
     }
 
     botonIngresar.disabled = true;
     botonIngresar.textContent = "Verificando…";
-    mostrarMensaje("", "");
+    mensaje.textContent = "";
 
     try {
-        const resultado = await validarUsuario(correo, clave);
+        const usuario = await SupaDB.validarUsuario(correo, clave);
 
-        if (resultado.existe) {
-            sessionStorage.setItem("usuario", resultado.usuario.email || correo);
-            sessionStorage.setItem("token", resultado.token);
+        if (usuario) {
+            sessionStorage.setItem("usuario", usuario.correo);
             window.location.href = "bienvenida.html";
-        } else {
-            mostrarMensaje("Usuario inválido. Verifica tus datos e inténtalo de nuevo.", "error");
-            tarjeta.classList.remove("sacudir");
-            void tarjeta.offsetWidth; // reinicia la animación
-            tarjeta.classList.add("sacudir");
+            return;
         }
+
+        // No existe: volver al login con el aviso
+        window.location.replace("login.html?error=invalido");
     } catch (error) {
-        mostrarMensaje("No se pudo validar el usuario: " + error.message, "error");
-    } finally {
+        mostrarError("No se pudo conectar con la base de datos: " + error.message);
         botonIngresar.disabled = false;
         botonIngresar.textContent = "Ingresar";
     }
