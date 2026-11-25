@@ -3,31 +3,311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Iniciar sesión — Biblioteca Digital</title>
-<link rel="stylesheet" href="estilo.css">
+<title>Biblioteca Digital — AUNAR</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;color:#ecf0f1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#1b2735 0%,#2c3e50 55%,#3b5266 100%)}
+.oculto{display:none!important}
+.sello{font-size:1.6rem;color:#d4af37;margin-bottom:10px}
+.tarjeta{width:100%;max-width:400px;padding:40px 35px;text-align:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:16px;box-shadow:0 15px 40px rgba(0,0,0,.35);backdrop-filter:blur(8px)}
+.tarjeta h1,.cabecera h1{font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:2rem;letter-spacing:1px}
+.subtitulo{margin:8px 0 28px;font-size:.92rem;color:#bdc7d0}
+label{display:block;margin-bottom:6px;font-size:.85rem;color:#d5dde3}
+input{width:100%;padding:12px 14px;margin-bottom:18px;font-size:1rem;color:#fff;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.2);border-radius:8px;outline:none;transition:border-color .3s,box-shadow .3s}
+input::placeholder{color:#8394a3}
+input:focus{border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.2)}
+button{width:100%;padding:13px;font-size:1rem;font-weight:600;letter-spacing:.5px;color:#1b2735;background:#d4af37;border:none;border-radius:8px;cursor:pointer;transition:background-color .3s,transform .2s}
+button:hover{background:#e2c158;transform:translateY(-1px)}
+button:disabled{opacity:.7;cursor:wait;transform:none}
+#mensaje,#estado{min-height:1.4em;margin-top:16px;font-size:.9rem;text-align:center}
+.error{color:#ff8f8f!important}
+.pie-conexion{margin-top:22px;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:#7f93a5}
+.sacudir{animation:sacudir .4s ease}
+@keyframes sacudir{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.bienvenida{text-align:center;max-width:560px;animation:aparecer 1s ease both}
+.bienvenida .saludo{font-size:1rem;letter-spacing:4px;text-transform:uppercase;color:#d4af37}
+.bienvenida h1{margin:14px 0 20px;font-size:2.4rem;word-break:break-word}
+.linea{width:80px;height:2px;margin:0 auto 22px;background:#d4af37}
+.bienvenida .texto{font-size:1.05rem;color:#d5dde3}
+.bienvenida .fecha{margin:12px 0 6px;font-size:.9rem;text-transform:capitalize;color:#9fb0bd}
+.bienvenida .origen{margin-bottom:28px;font-size:.78rem;color:#7f93a5}
+.acciones{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.bienvenida button,.btn-salir{width:auto;padding:12px 30px;color:#d4af37;background:transparent;border:1px solid #d4af37}
+.bienvenida button:hover,.btn-salir:hover{color:#1b2735;background:#d4af37}
+@keyframes aparecer{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#vista-biblioteca{align-items:flex-start;width:100%;max-width:1100px;margin:0 auto}
+.contenedor{width:100%}
+.cabecera{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:26px}
+.cabecera .usuario{font-size:.85rem;color:#9fb0bd}
+.barra{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.barra input{flex:1 1 260px;margin-bottom:0}
+.barra select{flex:0 1 220px;padding:12px 14px;font-size:.95rem;color:#fff;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.2);border-radius:8px;outline:none}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin-top:10px}
+.libro{display:flex;flex-direction:column;padding:22px;text-align:left;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.25);transition:transform .2s,border-color .2s;cursor:pointer}
+.libro:hover{transform:translateY(-4px);border-color:#d4af37}
+.libro .categoria{align-self:flex-start;padding:4px 10px;margin-bottom:14px;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:#d4af37;border:1px solid rgba(212,175,55,.5);border-radius:20px}
+.libro h2{margin-bottom:8px;font-family:Georgia,serif;font-size:1.25rem;font-weight:normal}
+.libro .autor{margin-bottom:14px;font-size:.88rem;color:#9fb0bd}
+.libro .descripcion{flex:1;font-size:.85rem;line-height:1.5;color:#c3ced7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.libro .anio{margin-top:14px;font-size:.75rem;color:#7f93a5}
+.vacio{grid-column:1/-1;padding:50px 20px;text-align:center;color:#9fb0bd;border:1px dashed rgba(255,255,255,.2);border-radius:14px}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.7);z-index:10}
+.modal.abierto{display:flex}
+.modal .contenido{width:100%;max-width:480px;padding:32px;background:#243444;border:1px solid rgba(212,175,55,.5);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.modal h2{margin:12px 0 6px;font-family:Georgia,serif;font-weight:normal}
+.modal .autor{margin-bottom:18px;color:#9fb0bd}
+.modal p{line-height:1.6;color:#d5dde3}
+.modal .cerrar{width:auto;margin-top:22px;padding:10px 24px;color:#d4af37;background:transparent;border:1px solid #d4af37}
+@media(max-width:600px){.cabecera h1{font-size:1.6rem}.barra{flex-direction:column}.barra select{flex:1 1 auto}}
+</style>
 </head>
-<body class="pagina-login">
+<body>
 
+<section id="vista-login">
     <main class="tarjeta" id="tarjeta">
         <div class="sello">✦</div>
         <h1>Biblioteca Digital</h1>
         <p class="subtitulo">Ingresa tus credenciales para continuar</p>
-
         <form id="form-login" novalidate>
             <label for="correo">Correo electrónico</label>
             <input type="email" id="correo" autocomplete="username" placeholder="nombre@correo.com" required>
-
             <label for="clave">Contraseña</label>
             <input type="password" id="clave" autocomplete="current-password" placeholder="••••••••" required>
-
             <button type="submit" id="btn-ingresar">Ingresar</button>
             <p id="mensaje" role="alert" aria-live="polite"></p>
         </form>
-
         <p class="pie-conexion">Conexión segura con Supabase</p>
     </main>
+</section>
 
-    <script src="supabase.js"></script>
-    <script src="login.js"></script>
+<section id="vista-bienvenida" class="oculto">
+    <main class="bienvenida">
+        <div class="sello">✦</div>
+        <p class="saludo" id="saludo">Bienvenido</p>
+        <h1 id="usuario">&nbsp;</h1>
+        <div class="linea"></div>
+        <p class="texto">Has ingresado correctamente. Nos alegra tenerte de vuelta.</p>
+        <p class="fecha" id="fecha"></p>
+        <p class="origen" id="origen"></p>
+        <div class="acciones">
+            <button type="button" id="btn-biblioteca">Abrir biblioteca</button>
+            <button type="button" id="btn-salir">Cerrar sesión</button>
+        </div>
+    </main>
+</section>
+
+<section id="vista-biblioteca" class="oculto">
+    <div class="contenedor">
+        <header class="cabecera">
+            <div>
+                <div class="sello">✦</div>
+                <h1>Biblioteca Digital</h1>
+                <p class="usuario" id="usuario-biblio"></p>
+            </div>
+            <div class="acciones">
+                <button type="button" class="btn-salir" id="btn-inicio">Inicio</button>
+                <button type="button" class="btn-salir" id="btn-salir-biblio">Cerrar sesión</button>
+            </div>
+        </header>
+        <div class="barra">
+            <input type="search" id="buscar" placeholder="Buscar por título o autor…" autocomplete="off">
+            <select id="categoria"><option value="">Todas las categorías</option></select>
+        </div>
+        <p id="estado" role="status" aria-live="polite"></p>
+        <section class="rejilla" id="rejilla"></section>
+    </div>
+</section>
+
+<div class="modal" id="modal">
+    <div class="contenido">
+        <div class="sello">✦</div>
+        <h2 id="m-titulo"></h2>
+        <p class="autor" id="m-autor"></p>
+        <p id="m-descripcion"></p>
+        <p class="anio" id="m-anio"></p>
+        <button type="button" class="cerrar" id="m-cerrar">Cerrar</button>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://hypxybgvxvpwfqflijty.supabase.co";
+const SUPABASE_KEY = "sb_publishable_x6A2XiGzM9F2Qlk9xwBUvA_UK3HoJJz";
+const USUARIO_ARRANQUE = { email: "cehg@aunar.com", clave: "aunar123" };
+
+function headers(token){
+    const h = { "apikey": SUPABASE_KEY, "Content-Type": "application/json" };
+    if(token) h["Authorization"] = "Bearer " + token;
+    return h;
+}
+async function pedir(ruta, opciones, token){
+    opciones = opciones || {};
+    const r = await fetch(SUPABASE_URL + ruta, {
+        method: opciones.method || "GET",
+        headers: headers(token),
+        body: opciones.body
+    });
+    const texto = await r.text();
+    let datos;
+    try { datos = texto ? JSON.parse(texto) : null; } catch(e){ datos = texto; }
+    if(!r.ok){
+        const err = new Error((datos && (datos.msg || datos.message || datos.error_description)) || ("Error " + r.status));
+        err.status = r.status;
+        err.codigo = (datos && (datos.error_code || datos.code)) || null;
+        throw err;
+    }
+    return datos;
+}
+const Supa = {
+    iniciarSesion: function(correo, clave){
+        return pedir("/auth/v1/token?grant_type=password", {
+            method:"POST", body: JSON.stringify({email:correo, password:clave})
+        }).then(function(d){ return { usuario:d.user, token:d.access_token }; });
+    },
+    verificarToken: function(token){ return pedir("/auth/v1/user", {method:"GET"}, token); },
+    cerrarSesion: function(token){ if(!token) return Promise.resolve(); return pedir("/auth/v1/logout",{method:"POST"},token).catch(function(){}); },
+    listar: function(tabla, opciones, token){
+        const p = new URLSearchParams();
+        p.set("select", (opciones && opciones.columnas) || "*");
+        if(opciones && opciones.ordenar) p.set("order", opciones.ordenar);
+        return pedir("/rest/v1/" + encodeURIComponent(tabla) + "?" + p.toString(), {method:"GET"}, token);
+    },
+    sesion:{
+        guardar: function(d){ sessionStorage.setItem("biblio_sesion", JSON.stringify(d)); },
+        leer: function(){ try{ return JSON.parse(sessionStorage.getItem("biblio_sesion")||"null"); }catch(e){ return null; } },
+        borrar: function(){ sessionStorage.removeItem("biblio_sesion"); }
+    }
+};
+
+function mostrar(id){
+    ["vista-login","vista-bienvenida","vista-biblioteca"].forEach(function(v){
+        document.getElementById(v).classList.toggle("oculto", v !== id);
+    });
+    window.scrollTo(0,0);
+}
+
+const sesion = Supa.sesion.leer();
+if(sesion && sesion.email) mostrar("vista-bienvenida");
+else mostrar("vista-login");
+
+const form = document.getElementById("form-login");
+const btnIngresar = document.getElementById("btn-ingresar");
+const mensaje = document.getElementById("mensaje");
+const tarjeta = document.getElementById("tarjeta");
+
+function decir(texto, error){
+    mensaje.textContent = texto;
+    mensaje.className = error ? "error" : "";
+}
+form.addEventListener("submit", async function(e){
+    e.preventDefault();
+    const correo = document.getElementById("correo").value.trim();
+    const clave = document.getElementById("clave").value;
+    if(!correo || !clave){ decir("Escribe tu correo y tu contraseña.", true); return; }
+    btnIngresar.disabled = true;
+    btnIngresar.textContent = "Conectando con Supabase…";
+    decir("");
+    try{
+        const r = await Supa.iniciarSesion(correo, clave);
+        Supa.sesion.guardar({ email:r.usuario.email || correo, token:r.token, origen:"supabase" });
+        location.reload();
+        return;
+    }catch(err){
+        const sinUsuario = err.codigo === "invalid_credentials" || err.codigo === "email_not_confirmed";
+        if(sinUsuario && correo.toLowerCase() === USUARIO_ARRANQUE.email && clave === USUARIO_ARRANQUE.clave){
+            Supa.sesion.guardar({ email:correo, token:null, origen:"arranque" });
+            location.reload();
+            return;
+        }
+        decir(sinUsuario ? "Usuario inválido. Verifica tus datos." : ("No se pudo conectar: " + err.message), true);
+        tarjeta.classList.remove("sacudir"); void tarjeta.offsetWidth; tarjeta.classList.add("sacudir");
+    }finally{
+        btnIngresar.disabled = false;
+        btnIngresar.textContent = "Ingresar";
+    }
+});
+
+if(sesion && sesion.email){
+    const hora = new Date().getHours();
+    document.getElementById("saludo").textContent = hora < 12 ? "Buenos días" : (hora < 19 ? "Buenas tardes" : "Buenas noches");
+    document.getElementById("usuario").textContent = sesion.email;
+    document.getElementById("fecha").textContent = new Date().toLocaleDateString("es-CO",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+    document.getElementById("origen").textContent = sesion.origen === "supabase"
+        ? "Sesión autenticada con Supabase"
+        : "Sesión de arranque — ejecuta setup.sql para activar Supabase";
+    document.getElementById("btn-biblioteca").addEventListener("click", function(){ cargarBiblioteca(); mostrar("vista-biblioteca"); });
+    document.getElementById("btn-salir").addEventListener("click", cerrarSesion);
+    document.getElementById("btn-inicio").addEventListener("click", function(){ mostrar("vista-bienvenida"); });
+    document.getElementById("btn-salir-biblio").addEventListener("click", cerrarSesion);
+}
+
+async function cerrarSesion(){
+    if(sesion && sesion.token) await Supa.cerrarSesion(sesion.token);
+    Supa.sesion.borrar();
+    location.reload();
+}
+
+let libros = [];
+const estado = document.getElementById("estado");
+const rejilla = document.getElementById("rejilla");
+const buscar = document.getElementById("buscar");
+const categoria = document.getElementById("categoria");
+const modal = document.getElementById("modal");
+
+function escapar(t){
+    return String(t == null ? "" : t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function pintar(){
+    const q = buscar.value.trim().toLowerCase();
+    const cat = categoria.value;
+    const visibles = libros.filter(function(l){
+        return (!q || String(l.titulo||"").toLowerCase().includes(q) || String(l.autor||"").toLowerCase().includes(q))
+            && (!cat || l.categoria === cat);
+    });
+    if(!visibles.length){ rejilla.innerHTML = '<div class="vacio">No hay libros que coincidan.</div>'; return; }
+    rejilla.innerHTML = visibles.map(function(l){
+        return '<article class="libro" data-id="'+escapar(l.id)+'">'+
+            '<span class="categoria">'+escapar(l.categoria||"General")+'</span>'+
+            '<h2>'+escapar(l.titulo)+'</h2>'+
+            '<p class="autor">'+escapar(l.autor)+'</p>'+
+            '<p class="descripcion">'+escapar(l.descripcion)+'</p>'+
+            (l.anio?'<p class="anio">Año '+escapar(l.anio)+'</p>':'')+'</article>';
+    }).join("");
+    rejilla.querySelectorAll(".libro").forEach(function(t){
+        t.addEventListener("click", function(){
+            const l = libros.find(function(x){ return String(x.id) === t.dataset.id; });
+            if(!l) return;
+            document.getElementById("m-titulo").textContent = l.titulo || "Sin título";
+            document.getElementById("m-autor").textContent = l.autor || "Autor desconocido";
+            document.getElementById("m-descripcion").textContent = l.descripcion || "Sin descripción.";
+            document.getElementById("m-anio").textContent = l.anio ? "Año: " + l.anio : "";
+            modal.classList.add("abierto");
+        });
+    });
+}
+async function cargarBiblioteca(){
+    document.getElementById("usuario-biblio").textContent = "Conectado como " + sesion.email;
+    estado.textContent = "Conectando con Supabase…";
+    estado.className = "";
+    try{
+        libros = await Supa.listar("libros", { columnas:"id,titulo,autor,categoria,descripcion,anio", ordenar:"titulo.asc" }, sesion.token);
+        const cats = Array.from(new Set(libros.map(function(l){return l.categoria;}).filter(Boolean))).sort();
+        categoria.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(function(c){
+            return '<option value="'+escapar(c)+'">'+escapar(c)+'</option>';
+        }).join("");
+        estado.textContent = libros.length ? libros.length + " libros · datos en vivo desde Supabase" : "La tabla 'libros' está vacía. Ejecuta setup.sql.";
+        pintar();
+    }catch(e){
+        rejilla.innerHTML = "";
+        estado.className = "error";
+        estado.textContent = (e.codigo === "PGRST205" || e.status === 404)
+            ? "La tabla 'libros' no existe. Abre el SQL Editor de Supabase y ejecuta setup.sql."
+            : ("No se pudo leer la biblioteca: " + e.message);
+    }
+}
+buscar.addEventListener("input", pintar);
+categoria.addEventListener("change", pintar);
+document.getElementById("m-cerrar").addEventListener("click", function(){ modal.classList.remove("abierto"); });
+modal.addEventListener("click", function(e){ if(e.target === modal) modal.classList.remove("abierto"); });
+</script>
 </body>
 </html>
